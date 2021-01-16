@@ -20,6 +20,7 @@ setup (
         install_requires=[
             'Flask>=0.2',
             'youtube-dl',
+            'mutagen'
         ],
         entry_points={
             'console_scripts': [

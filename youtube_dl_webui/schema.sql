@@ -42,5 +42,6 @@ CREATE TABLE task_ydl_opt (
     tid     TEXT    PRIMARY KEY NOT NULL,
     url     TEXT    NOT NULL,
     state   INTEGER NOT NULL DEFAULT 2,
-    opt     TEXT    NOT NULL DEFAULT '{}'
+    opt     TEXT    NOT NULL DEFAULT '{}',
+    id3tags TEXT    NOT NULL DEFAULT '{}'
 );

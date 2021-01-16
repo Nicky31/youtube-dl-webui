@@ -18,12 +18,15 @@ from .utils import state_index
 
 from .worker import Worker
 
+from .postprocess import apply_id3tags, move_track_to_genre_directory
+
 class Task(object):
 
-    def __init__(self, tid, msg_cli, ydl_opts={}, info={}, status={}, log_size=10):
+    def __init__(self, tid, msg_cli, ydl_opts={}, id3tags={}, info={}, status={}, log_size=10):
         self.logger = logging.getLogger('ydl_webui')
         self.tid = tid
         self.ydl_opts = ydl_opts
+        self.id3tags = id3tags
         self.ydl_conf = ydl_conf(ydl_opts)
         self.info = info
         self.url = info['url']
@@ -89,6 +92,13 @@ class Task(object):
         self.elapsed = self.elapsed + (tm - self.touch)
         self.touch = tm
 
+        filename = self.info.get('filename', '')
+        if filename:
+            if filename[-5:] == ".webm":
+                filename = filename[0:-5] + ".mp3"
+            apply_id3tags(filename, self.id3tags)
+            move_track_to_genre_directory(filename, self.id3tags)        
+
         self.worker.stop()
         self.log.appendleft({'time': int(tm), 'type': 'debug', 'msg': 'Task finishs...'})
 
@@ -102,6 +112,8 @@ class Task(object):
         tm = time()
         self.elapsed = self.elapsed + (tm - self.touch)
         self.touch = tm
+        if 'filename' in data:
+            self.info['filename'] = data['filename']
 
 
 class TaskManager(object):
@@ -124,12 +136,11 @@ class TaskManager(object):
 
         self._tasks_dict = {}
 
-    def new_task(self, url, ydl_opts={}):
+    def new_task(self, url, ydl_opts={}, id3tags={}):
         """Create a new task and put it in inactive type"""
-
         # stripe out necessary fields
         ydl_opts = ydl_conf(ydl_opts)
-        return self._db.new_task(url, ydl_opts.dict())
+        return self._db.new_task(url, ydl_opts.dict(), id3tags)
 
     def start_task(self, tid, ignore_state=False):
         """make an inactive type task into active type"""
@@ -141,7 +152,8 @@ class TaskManager(object):
                 raise TaskError('Task is downloading')
         else:
             try:
-                ydl_opts = self.ydl_conf.merge_conf(self._db.get_ydl_opts(tid))
+                task_opts = self._db.get_task_opts(tid)
+                ydl_opts = self.ydl_conf.merge_conf(task_opts['ytdl_opts'])
                 info     = self._db.get_info(tid)
                 status   = self._db.get_stat(tid)
             except TaskInexistenceError as e:
@@ -150,7 +162,7 @@ class TaskManager(object):
             if status['state'] == state_index['finished']:
                 raise TaskError('Task is finished')
 
-            task = Task(tid, self._msg_cli, ydl_opts=ydl_opts, info=info,
+            task = Task(tid, self._msg_cli, ydl_opts=ydl_opts, id3tags=task_opts['id3tags'], info=info,
                         status=status, log_size=self._conf['general']['log_size'])
             self._tasks_dict[tid] = task
 

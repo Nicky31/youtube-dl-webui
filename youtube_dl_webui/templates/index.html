@@ -135,6 +135,7 @@
                         <div>
                             <label>Proxy:</label><input type="text" ref="proxy" v-model="modalData.preference.youtube_dl.proxy" v-cloak @keyup.esc="showModal = false"/>
                         </div>
+                                                                 
                     </div>
                 </template>
                 <template v-if="modalType === 'about'">
@@ -177,6 +178,40 @@
                         <div>
                             <label>Format:</label><input type="text" ref="format" v-model="modalData.add.ydl_opts.format" v-cloak @keyup.esc="showModal = false"/>
                         </div>
+                        <div style="text-align:center;">
+                            <hr class="left-hr" /><span style="font-weight: bold;">ID3Tags</span><hr class="right-hr" />
+                        </div>
+                        <div>
+                            <label>Artist :</label><input type="text" ref="artist" v-model="modalData.add.id3tags.artist" v-cloak @keyup.esc="showModal = false"/>
+                        </div>                        
+                        <div>
+                            <label>Title :</label><input type="text" ref="title" v-model="modalData.add.id3tags.title" v-cloak @keyup.esc="showModal = false"/>
+                        </div>                                                
+                        <div>
+                            <label>Genre :</label>
+                            <select ref="genre" style="width: 100%"
+                                v-model="modalData.add.id3tags.genre" v-cloak @keyup.esc="showModal = false"
+                            >
+                                <option value="">No genre</option>
+                                {% for genre in available_genres %}                                
+                                    <option value="{{ genre }}">{{ genre }}</option>
+                                {% endfor %}
+                            </select>                                                        
+                        </div>                                                
+                        <div>
+                            <label>Energy :</label>
+                            <select ref="lvl" style="width: 100%"
+                                v-model="modalData.add.id3tags.lvl" v-cloak @keyup.esc="showModal = false"
+                            >
+                                <option value="">N/A</option>
+                                {% for level in available_levels %}                                
+                                    <option value="{{ level }}">{{ level }}</option>
+                                {% endfor %}
+                            </select>                                     
+                        </div>                               
+                        <div>
+                            <label>Comment :</label><input type="text" ref="comment" v-model="modalData.add.id3tags.comment" v-cloak @keyup.esc="showModal = false"/>
+                        </div>                              
                     </div>
                 </template>
             </modal>

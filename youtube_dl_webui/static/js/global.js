@@ -13,7 +13,7 @@ var videoDownload = (function (Vue, extendAM){
         showTab: 'Status',
         stateCounter: { all: 0, downloading: 0, finished: 0, paused: 0, invalid: 0},
         modalData: {
-            add: { url: '', ydl_opts: {} },
+            add: { url: '', ydl_opts: {}, id3tags: {} },
             remove: { removeFile: false },
             preference: {youtube_dl: {fomart: '', proxy: ''}, general: {download_dir: '', db_path: '', log_size: ''}},
         },
@@ -49,6 +49,8 @@ var videoDownload = (function (Vue, extendAM){
             methods: {
                 showAddTaskModal: function(){
                     this.modalData.add.url = '';
+                    this.modalData.add.title = '';
+                    this.modalData.add.comment = '';
                     this.showModal = true;
                     this.modalType = 'addTask';
                     console.log(this.modalData);

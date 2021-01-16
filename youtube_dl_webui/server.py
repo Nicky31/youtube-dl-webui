@@ -9,6 +9,8 @@ from flask import request
 from multiprocessing import Process
 from copy import deepcopy
 
+from .postprocess import get_genres_list, get_level_directories
+
 MSG = None
 
 app = Flask(__name__)
@@ -17,7 +19,11 @@ MSG_INVALID_REQUEST = {'status': 'error', 'errmsg': 'invalid request'}
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template(
+        'index.html',
+        available_genres=get_genres_list(),
+        available_levels=get_level_directories()
+    )
 
 
 @app.route('/task', methods=['POST'])

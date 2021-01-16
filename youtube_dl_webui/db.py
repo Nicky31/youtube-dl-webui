@@ -12,7 +12,8 @@ from time import time
 from .utils import state_index, state_name
 from .utils import TaskExistenceError
 from .utils import TaskInexistenceError
-from .utils  import url2tid
+from .utils import url2tid
+
 
 class DataBase(object):
     def __init__(self, db_path):
@@ -75,14 +76,17 @@ class DataBase(object):
 
         self.conn.commit()
 
-    def get_ydl_opts(self, tid):
-        self.db.execute('SELECT opt FROM task_ydl_opt WHERE tid=(?)', (tid, ))
+    def get_task_opts(self, tid):
+        self.db.execute('SELECT opt, id3tags FROM task_ydl_opt WHERE tid=(?)', (tid, ))
         row = self.db.fetchone()
 
         if row is None:
             raise TaskInexistenceError('task does not exist')
 
-        return json.loads(row['opt'])
+        return {
+            "ytdl_opts": json.loads(row['opt']),
+            "id3tags": json.loads(row['id3tags']),
+        }
 
     def get_stat(self, tid):
         self.db.execute('SELECT * FROM task_status WHERE tid=(?)', (tid, ))
@@ -102,7 +106,7 @@ class DataBase(object):
 
         return dict(row)
 
-    def new_task(self, url, ydl_opts):
+    def new_task(self, url, ydl_opts, id3tags):
         tid = url2tid(url)
 
         self.db.execute('SELECT * FROM task_status WHERE tid=(?)', (tid, ))
@@ -110,12 +114,13 @@ class DataBase(object):
             raise TaskExistenceError('Task exists')
 
         ydl_opts_str = json.dumps(ydl_opts)
+        id3tags_str = json.dumps(id3tags)
 
         self.db.execute('INSERT INTO task_status (tid, url) VALUES (?, ?)', (tid, url))
         self.db.execute('INSERT INTO task_info (tid, url, create_time) VALUES (?, ?, ?)',
                         (tid, url, time()))
-        self.db.execute('INSERT INTO task_ydl_opt (tid, url, opt) VALUES (?, ?, ?)',
-                        (tid, url, ydl_opts_str))
+        self.db.execute('INSERT INTO task_ydl_opt (tid, url, opt, id3tags) VALUES (?, ?, ?, ?)',
+                        (tid, url, ydl_opts_str, id3tags_str))
         self.conn.commit()
 
         return tid
