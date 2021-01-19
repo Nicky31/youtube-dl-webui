@@ -35,7 +35,6 @@ def get_genres_list():
 
 
 def apply_id3tags(filepath, id3tags):
-    print("au debut de apply id3tags")
     try:
         meta = EasyID3(filepath)
     except mutagen.id3.ID3NoHeaderError:
